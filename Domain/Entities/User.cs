@@ -28,5 +28,62 @@ namespace Domain.Entities
         [BsonElement("status")]
         [BsonRepresentation(MongoDB.Bson.BsonType.String)]
         public AccountStatus Status { get; set; } = AccountStatus.Active;
+
+        [BsonElement("lastLoginAt")]
+        public DateTime? LastLoginAt { get; set; }
+
+        [BsonElement("assignedStationIds")]
+        public List<string> AssignedStationIds { get; set; } = new List<string>();
+
+        [BsonElement("refreshToken")]
+        public string? RefreshToken { get; set; }
+
+        [BsonElement("refreshTokenExpiry")]
+        public DateTime? RefreshTokenExpiry { get; set; }
+
+        public bool CanAccessStation(string stationId)
+        {
+            if (Role == UserRole.Backoffice)
+                return true; // Backoffice can access all stations
+
+            return AssignedStationIds.Contains(stationId);
+        }
+
+        public void AssignStation(string stationId)
+        {
+            if (!AssignedStationIds.Contains(stationId))
+            {
+                AssignedStationIds.Add(stationId);
+                UpdatedAt = DateTime.UtcNow;
+            }
+        }
+
+        public void UnassignStation(string stationId)
+        {
+            if (AssignedStationIds.Remove(stationId))
+            {
+                UpdatedAt = DateTime.UtcNow;
+            }
+        }
+
+        public void UpdateLastLogin()
+        {
+            LastLoginAt = DateTime.UtcNow;
+            UpdatedAt = DateTime.UtcNow;
+        }
+
+        public void SetRefreshToken(string token, DateTime expiry)
+        {
+            RefreshToken = token;
+            RefreshTokenExpiry = expiry;
+            UpdatedAt = DateTime.UtcNow;
+        }
+
+        public void ClearRefreshToken()
+        {
+            RefreshToken = null;
+            RefreshTokenExpiry = null;
+            UpdatedAt = DateTime.UtcNow;
+        }
     }
 }
