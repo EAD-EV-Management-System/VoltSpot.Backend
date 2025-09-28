@@ -1,0 +1,59 @@
+﻿using Domain.Interfaces.Repositories;
+using Infrastructure.Data.Configurations;
+using Infrastructure.Data.Context;
+using Infrastructure.Data.Repositories;
+using MongoDB.Bson.Serialization.Conventions;
+using MongoDB.Driver;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+
+namespace Infrastructure
+{
+    public static class DependencyInjection
+    {
+        public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
+        {
+            // Configure MongoDB settings
+            services.Configure<MongoDbSettings>(configuration.GetSection("MongoDbSettings"));
+
+            // Configure MongoDB conventions
+            ConfigureMongoDbConventions();
+
+            // Register MongoDB client and database
+            services.AddSingleton<IMongoClient>(serviceProvider =>
+            {
+                var settings = configuration.GetSection("MongoDbSettings").Get<MongoDbSettings>();
+                return new MongoClient(settings!.ConnectionString);
+            });
+
+            services.AddSingleton<IMongoDatabase>(serviceProvider =>
+            {
+                var settings = configuration.GetSection("MongoDbSettings").Get<MongoDbSettings>();
+                var client = serviceProvider.GetRequiredService<IMongoClient>();
+                return client.GetDatabase(settings!.DatabaseName);
+            });
+
+            // Register DbContext
+            services.AddScoped<AppDbContext>();
+
+            // Register repositories
+            services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<IEVOwnerRepository, EVOwnerRepository>();
+
+            return services;
+        }
+
+        private static void ConfigureMongoDbConventions()
+        {
+            var conventionPack = new ConventionPack
+            {
+                new CamelCaseElementNameConvention(),
+                new IgnoreExtraElementsConvention(true),
+                new IgnoreIfDefaultConvention(true),
+                new EnumRepresentationConvention(MongoDB.Bson.BsonType.String)
+            };
+
+            ConventionRegistry.Register("AppDBSystemConventions", conventionPack, t => true);
+        }
+    }
+}
