@@ -1,14 +1,13 @@
 ﻿using FluentValidation;
+using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
+using Application.Common.Behaviors;
 
 namespace Application
 {
     public static class DependencyInjection
     {
-        /// <summary>
-        /// Add application services to the service collection
-        /// </summary>
         public static IServiceCollection AddApplication(this IServiceCollection services)
         {
             // Register MediatR for CQRS
@@ -18,7 +17,10 @@ namespace Application
             services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
 
             // Register AutoMapper
-            //services.AddAutoMapper(Assembly.GetExecutingAssembly());
+            services.AddAutoMapper(cfg => { }, Assembly.GetExecutingAssembly());
+
+            // Register MediatR behaviors
+            services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
 
             return services;
         }
