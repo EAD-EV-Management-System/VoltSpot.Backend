@@ -1,13 +1,16 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.14.36518.9 d17.14
+VisualStudioVersion = 17.14.36518.9
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Domain", "Domain\Domain.csproj", "{DAEF1F99-3E1D-4D57-B572-277A9C3A710F}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Application", "Application\Application.csproj", "{08667E57-F4A7-4AA0-8896-DFF0A0742B4F}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Infrastructure", "Infrastructure\Infrastructure.csproj", "{5E2F22A3-EE89-410F-8906-E4F55A448C98}"
+	ProjectSection(ProjectDependencies) = postProject
+		{08667E57-F4A7-4AA0-8896-DFF0A0742B4F} = {08667E57-F4A7-4AA0-8896-DFF0A0742B4F}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebAPI", "WebAPI\WebAPI.csproj", "{1F9B44C4-1ECC-4022-BA9D-3035900C08E2}"
 EndProject
