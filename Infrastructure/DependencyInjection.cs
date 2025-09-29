@@ -1,11 +1,14 @@
-﻿using Domain.Interfaces.Repositories;
+﻿using Application.Common.Models;
+using Application.Interfaces.Services;
+using Domain.Interfaces.Repositories;
 using Infrastructure.Data.Configurations;
 using Infrastructure.Data.Context;
 using Infrastructure.Data.Repositories;
-using MongoDB.Bson.Serialization.Conventions;
-using MongoDB.Driver;
+using Infrastructure.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using MongoDB.Bson.Serialization.Conventions;
+using MongoDB.Driver;
 
 namespace Infrastructure
 {
@@ -15,6 +18,9 @@ namespace Infrastructure
         {
             // Configure MongoDB settings
             services.Configure<MongoDbSettings>(configuration.GetSection("MongoDbSettings"));
+
+            // Configure JWT settings
+            services.Configure<JwtSettings>(configuration.GetSection("JwtSettings"));
 
             // Configure MongoDB conventions
             ConfigureMongoDbConventions();
@@ -39,6 +45,11 @@ namespace Infrastructure
             // Register repositories
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IEVOwnerRepository, EVOwnerRepository>();
+
+            // Register services
+            services.AddScoped<IAuthenticationService, AuthenticationService>();
+            services.AddScoped<IJwtService, JwtService>();
+            services.AddScoped<IPasswordService, PasswordService>();
 
             return services;
         }
