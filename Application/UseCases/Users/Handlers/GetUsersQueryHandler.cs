@@ -19,32 +19,12 @@ namespace Application.UseCases.Users.Handlers
 
         public async Task<IEnumerable<UserResponseDto>> Handle(GetUsersQuery request, CancellationToken cancellationToken)
         {
-            IEnumerable<Domain.Entities.User> users;
-
-            if (request.Role.HasValue)
-            {
-                users = await _userRepository.GetByRoleAsync(request.Role.Value);
-            }
-            else
-            {
-                users = await _userRepository.GetAllAsync();
-            }
-
-            // Apply additional filters
-            if (request.Status.HasValue)
-            {
-                users = users.Where(u => u.Status == request.Status.Value);
-            }
-
-            if (!string.IsNullOrWhiteSpace(request.SearchTerm))
-            {
-                var searchTerm = request.SearchTerm.ToLower();
-                users = users.Where(u =>
-                    u.Username.ToLower().Contains(searchTerm) ||
-                    u.Email.ToLower().Contains(searchTerm) ||
-                    u.FirstName.ToLower().Contains(searchTerm) ||
-                    u.LastName.ToLower().Contains(searchTerm));
-            }
+            // Push all filtering to database level
+            var users = await _userRepository.GetUsersAsync(
+                role: request.Role,
+                status: request.Status,
+                searchTerm: request.SearchTerm
+            );
 
             return _mapper.Map<IEnumerable<UserResponseDto>>(users);
         }

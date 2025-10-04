@@ -1,5 +1,5 @@
-﻿using Application.Common.Models;
-using Application.Interfaces.Services;
+﻿using Application.Interfaces.Services;
+using Infrastructure.Common.Models;
 using Domain.Entities;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;

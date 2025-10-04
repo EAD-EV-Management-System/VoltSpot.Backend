@@ -1,5 +1,5 @@
-﻿using Application.Common.Models;
-using Application.Interfaces.Services;
+﻿using Application.Interfaces.Services;
+using Infrastructure.Common.Models;
 using Domain.Interfaces.Repositories;
 using Infrastructure.Data.Configurations;
 using Infrastructure.Data.Context;
@@ -47,7 +47,6 @@ namespace Infrastructure
             services.AddScoped<IEVOwnerRepository, EVOwnerRepository>();
 
             // Register services
-            services.AddScoped<IAuthenticationService, AuthenticationService>();
             services.AddScoped<IJwtService, JwtService>();
             services.AddScoped<IPasswordService, PasswordService>();
 
