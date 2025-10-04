@@ -18,4 +18,12 @@
     <PackageReference Include="MongoDB.Bson" Version="3.5.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="DTOs\Request\Booking\" />
+    <Folder Include="DTOs\Response\Booking\" />
+    <Folder Include="UseCases\Booking\Commands\" />
+    <Folder Include="UseCases\Booking\Handlers\" />
+    <Folder Include="UseCases\Booking\Queries\" />
+  </ItemGroup>
+
 </Project>
