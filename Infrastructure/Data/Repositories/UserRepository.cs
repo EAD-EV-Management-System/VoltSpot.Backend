@@ -2,6 +2,7 @@
 using Domain.Enums;
 using Domain.Interfaces.Repositories;
 using Infrastructure.Data.Context;
+using MongoDB.Bson;
 using MongoDB.Driver;
 
 namespace Infrastructure.Data.Repositories
@@ -28,6 +29,35 @@ namespace Infrastructure.Data.Repositories
         {
             return await _collection.Find(x => x.Role == role && !x.IsDeleted)
                                   .ToListAsync();
+        }
+
+        public async Task<IEnumerable<User>> GetUsersAsync(UserRole? role = null, AccountStatus? status = null, string? searchTerm = null)
+        {
+            var filterBuilder = Builders<User>.Filter;
+            var filter = filterBuilder.Eq(u => u.IsDeleted, false);
+
+            if (role.HasValue)
+            {
+                filter &= filterBuilder.Eq(u => u.Role, role.Value);
+            }
+
+            if (status.HasValue)
+            {
+                filter &= filterBuilder.Eq(u => u.Status, status.Value);
+            }
+
+            if (!string.IsNullOrWhiteSpace(searchTerm))
+            {
+                var searchFilter = filterBuilder.Or(
+                    filterBuilder.Regex(u => u.Username, new BsonRegularExpression(searchTerm, "i")),
+                    filterBuilder.Regex(u => u.Email, new BsonRegularExpression(searchTerm, "i")),
+                    filterBuilder.Regex(u => u.FirstName, new BsonRegularExpression(searchTerm, "i")),
+                    filterBuilder.Regex(u => u.LastName, new BsonRegularExpression(searchTerm, "i"))
+                );
+                filter &= searchFilter;
+            }
+
+            return await _collection.Find(filter).ToListAsync();
         }
 
         public async Task<bool> ExistsByUsernameAsync(string username)

@@ -31,40 +31,41 @@ namespace WebAPI.Middleware
         {
             context.Response.ContentType = "application/json";
 
+            var (statusCode, message) = exception switch
+            {
+                FluentValidation.ValidationException validationEx => (
+                    (int)HttpStatusCode.BadRequest,
+                    validationEx.Message
+                ),
+                UnauthorizedAccessException => (
+                    (int)HttpStatusCode.Unauthorized,
+                    exception.Message
+                ),
+                InvalidOperationException => (
+                    (int)HttpStatusCode.BadRequest,
+                    exception.Message
+                ),
+                ArgumentException => (
+                    (int)HttpStatusCode.BadRequest,
+                    exception.Message
+                ),
+                KeyNotFoundException => (
+                    (int)HttpStatusCode.NotFound,
+                    "Resource not found"
+                ),
+                _ => (
+                    (int)HttpStatusCode.InternalServerError,
+                    "An internal server error occurred"
+                )
+            };
+
+            context.Response.StatusCode = statusCode;
+
             var response = new
             {
                 Success = false,
-                Message = "An error occurred",
-                Details = exception.Message
+                Message = message
             };
-
-            //switch (exception)
-            //{
-            //    case UnauthorizedAccessException:
-            //        context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
-            //        response = new { Success = false, Message = exception.Message };
-            //        break;
-
-            //    case InvalidOperationException:
-            //        context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
-            //        response = new { Success = false, Message = exception.Message };
-            //        break;
-
-            //    case ArgumentException:
-            //        context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
-            //        response = new { Success = false, Message = exception.Message };
-            //        break;
-
-            //    case KeyNotFoundException:
-            //        context.Response.StatusCode = (int)HttpStatusCode.NotFound;
-            //        response = new { Success = false, Message = "Resource not found" };
-            //        break;
-
-            //    default:
-            //        context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
-            //        response = new { Success = false, Message = "An internal server error occurred" };
-            //        break;
-            //}
 
             var jsonResponse = JsonSerializer.Serialize(response, new JsonSerializerOptions
             {

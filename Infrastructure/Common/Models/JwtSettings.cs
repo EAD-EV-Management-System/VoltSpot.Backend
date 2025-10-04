@@ -1,4 +1,4 @@
-﻿namespace Application.Common.Models
+namespace Infrastructure.Common.Models
 {
     public class JwtSettings
     {
