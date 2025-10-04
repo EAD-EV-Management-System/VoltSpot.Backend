@@ -13,7 +13,7 @@
   <ItemGroup>
     <Folder Include="DTOs\Response\" />
     <Folder Include="DTOs\Request\" />
-    <Folder Include="UseCases\" />
+    <Folder Include="VoltSpot\" />
   </ItemGroup>
 
   <ItemGroup>
