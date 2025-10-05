@@ -1,75 +1,46 @@
-﻿
+﻿using Application.UseCases.Bookings.Commands;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using System.Threading.Tasks;
-using VoltSpot.Application.UseCases;
 using VoltSpot.Application.DTOs;
+using WebAPI.Controllers.Base;
 
-namespace VoltSpot.WebAPI.Controllers
+namespace WebAPI.Controllers.V1
 {
-    [ApiController]
-    [Route("api/[controller]")]
-    public class BookingController : ControllerBase
+    public class BookingController : BaseController
     {
-        private readonly CreateBookingUseCase _createBookingUseCase;
-        private readonly CancelBookingUseCase _cancelBookingUseCase;
+        private readonly IMediator _mediator;
 
-        public BookingController(
-            CreateBookingUseCase createBookingUseCase,
-            CancelBookingUseCase cancelBookingUseCase)
+        public BookingController(IMediator mediator)
         {
-            _createBookingUseCase = createBookingUseCase;
-            _cancelBookingUseCase = cancelBookingUseCase;
+            _mediator = mediator;
         }
 
-
-        /// Creates a new booking
-
-        [HttpPost("create")]
+        [HttpPost]
         public async Task<IActionResult> CreateBooking([FromBody] CreateBookingRequestDto request)
         {
-            if (request == null)
-                return BadRequest("Invalid request data");
+            var command = new CreateBookingCommand
+            {
+                EvOwnerNic = request.EvOwnerNic,
+                ChargingStationId = request.ChargingStationId,
+                SlotNumber = request.SlotNumber,
+                ReservationDateTime = request.ReservationDateTime
+            };
 
-            var result = await _createBookingUseCase.ExecuteAsync(request);
-
-            if (result.Success)
-                return Ok(result);
-            else
-                return BadRequest(result);
+            var result = await _mediator.Send(command);
+            return Success(result, "Booking created successfully");
         }
-
-        /// <summary>
-        /// Updates an existing booking
-        /// </summary>
-        //[HttpPut("update")]
-        //public async Task<IActionResult> UpdateBooking([FromBody] UpdateBookingRequestDto request)
-        //{
-        //    if (request == null)
-        //        return BadRequest("Invalid request data");
-
-        //    var result = await _updateBookingUseCase.ExecuteAsync(request);
-
-        //    if (result.Success)
-        //        return Ok(result);
-        //    else
-        //        return BadRequest(result);
-        //}
-
-
-        /// Cancels an existing booking
 
         [HttpPut("cancel")]
         public async Task<IActionResult> CancelBooking([FromBody] CancelBookingRequestDto request)
         {
-            if (request == null)
-                return BadRequest("Invalid request data");
+            var command = new CancelBookingCommand
+            {
+                BookingId = request.BookingId,
+                CancellationReason = request.CancellationReason
+            };
 
-            var result = await _cancelBookingUseCase.ExecuteAsync(request);
-
-            if (result.Success)
-                return Ok(result);
-            else
-                return BadRequest(result);
+            var result = await _mediator.Send(command);
+            return Success("Booking cancelled successfully");
         }
     }
 }
