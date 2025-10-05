@@ -13,5 +13,6 @@ namespace Infrastructure.Data.Context
 
         public IMongoCollection<User> Users => _database.GetCollection<User>("Users");
         public IMongoCollection<EVOwner> EVOwners => _database.GetCollection<EVOwner>("EVOwners");
+        public IMongoCollection<Booking> Bookings => _database.GetCollection<Booking>("Bookings");
     }
 }

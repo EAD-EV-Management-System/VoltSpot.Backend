@@ -9,6 +9,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Bson.Serialization.Conventions;
 using MongoDB.Driver;
+using VoltSpot.Domain.Interfaces;
+using VoltSpot.Infrastructure.Repositories;
 
 namespace Infrastructure
 {
@@ -45,6 +47,7 @@ namespace Infrastructure
             // Register repositories
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IEVOwnerRepository, EVOwnerRepository>();
+            services.AddScoped<IBookingRepository, BookingRepository>();
 
             // Register services
             services.AddScoped<IJwtService, JwtService>();
