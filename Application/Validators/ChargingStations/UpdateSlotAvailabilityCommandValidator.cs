@@ -10,8 +10,12 @@ namespace Application.Validators.ChargingStations
             RuleFor(x => x.StationId)
                 .NotEmpty().WithMessage("Station ID is required");
 
+            RuleFor(x => x.TotalSlots)
+                .GreaterThan(0).WithMessage("Total slots must be greater than 0");
+
             RuleFor(x => x.AvailableSlots)
-                .GreaterThanOrEqualTo(0).WithMessage("Available slots cannot be negative");
+                .GreaterThanOrEqualTo(0).WithMessage("Available slots cannot be negative")
+                .LessThanOrEqualTo(x => x.TotalSlots).WithMessage("Available slots must be between 0 and total slots");
         }
     }
 }

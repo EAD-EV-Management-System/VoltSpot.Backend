@@ -19,6 +19,12 @@ namespace Application.UseCases.ChargingStations.Handlers
             if (station == null)
                 throw new KeyNotFoundException($"Charging station with ID {request.StationId} not found");
 
+            // Update both total slots and available slots if total slots are provided
+            if (request.TotalSlots > 0)
+            {
+                station.UpdateTotalSlots(request.TotalSlots);
+            }
+            
             station.UpdateAvailableSlots(request.AvailableSlots);
             await _repository.UpdateAsync(station);
 

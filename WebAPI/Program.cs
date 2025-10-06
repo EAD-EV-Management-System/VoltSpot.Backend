@@ -6,6 +6,9 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using WebAPI.Middleware;
+using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Mvc;
+using Application.Common.Converters;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,11 +17,25 @@ var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSetting
 var key = Encoding.UTF8.GetBytes(jwtSettings!.SecretKey);
 
 // Add services to the container.
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+.AddJsonOptions(options =>
+{
+    // Configure JSON to handle enums as strings
+    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+    options.JsonSerializerOptions.Converters.Add(new ChargingTypeJsonConverter());
+    options.JsonSerializerOptions.Converters.Add(new NullableChargingTypeJsonConverter());
+    options.JsonSerializerOptions.PropertyNamingPolicy = null; // Keep original property names
+    options.JsonSerializerOptions.PropertyNameCaseInsensitive = true; // Case insensitive matching
+});
 
-// Add FluentValidation
-builder.Services.AddFluentValidationAutoValidation()
-               .AddFluentValidationClientsideAdapters();
+// Configure ApiController behavior
+builder.Services.Configure<ApiBehaviorOptions>(options =>
+{
+    options.SuppressModelStateInvalidFilter = true; // Let FluentValidation handle validation
+});
+
+// Add FluentValidation but disable auto validation to avoid conflicts
+builder.Services.AddFluentValidationClientsideAdapters();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();

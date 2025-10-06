@@ -4,5 +4,6 @@ namespace Application.DTOs.Request.ChargingStations
     {
         public string StationId { get; set; } = string.Empty;
         public int AvailableSlots { get; set; }
+        public int TotalSlots { get; set; }
     }
 }

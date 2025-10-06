@@ -9,8 +9,13 @@ namespace Domain.Common
         [BsonRepresentation(BsonType.ObjectId)]
         public string Id { get; set; } = ObjectId.GenerateNewId().ToString();
 
+        [BsonElement("createdAt")]
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        
+        [BsonElement("updatedAt")]
         public DateTime? UpdatedAt { get; set; }
+        
+        [BsonElement("isDeleted")]
         public bool IsDeleted { get; set; } = false;
     }
 }

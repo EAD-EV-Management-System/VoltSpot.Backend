@@ -56,6 +56,20 @@ namespace Domain.Entities
             UpdatedAt = DateTime.UtcNow;
         }
 
+        public void UpdateTotalSlots(int newTotalSlots)
+        {
+            if (newTotalSlots <= 0)
+                throw new ArgumentException("Total slots must be greater than 0");
+
+            TotalSlots = newTotalSlots;
+            
+            // Adjust available slots if they exceed the new total
+            if (AvailableSlots > newTotalSlots)
+                AvailableSlots = newTotalSlots;
+                
+            UpdatedAt = DateTime.UtcNow;
+        }
+
         public void AssignOperator(string operatorId)
         {
             if (!AssignedOperatorIds.Contains(operatorId))
