@@ -26,6 +26,12 @@ namespace Application.UseCases.Bookings.Handlers
                 throw new KeyNotFoundException($"Booking with ID {request.BookingId} not found");
             }
 
+            // ADD THIS CHECK - 12 hour rule
+            if (!booking.CanBeModified())
+            {
+                throw new InvalidOperationException("Booking cannot be cancelled. Must be at least 12 hours before reservation time");
+            }
+
             // Use domain method to cancel booking
             booking.Cancel(request.CancellationReason ?? "No reason provided");
 
