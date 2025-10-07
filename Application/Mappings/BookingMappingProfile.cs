@@ -23,6 +23,13 @@ namespace Application.Mappings
             CreateMap<CreateBookingRequestDto, CreateBookingCommand>();
             CreateMap<CancelBookingRequestDto, CancelBookingCommand>();
             CreateMap<UpdateBookingRequestDto, UpdateBookingCommand>();
+
+
+            // NEW: Add this mapping for getting booking details
+            CreateMap<Booking, BookingDetailDto>()
+                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()));
+
+
         }
     }
 }

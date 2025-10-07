@@ -1,4 +1,5 @@
 ﻿using Application.UseCases.Bookings.Commands;
+using Application.UseCases.Bookings.Queries;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using VoltSpot.Application.DTOs;
@@ -55,5 +56,58 @@ namespace WebAPI.Controllers.V1
             var result = await _mediator.Send(command);
             return Success("Booking updated successfully");
         }
+
+        /*
+         * GET endpoint to retrieve a single booking by ID
+         * Route: GET /api/v1/booking/{bookingId}
+         */
+        [HttpGet("{bookingId}")]
+        public async Task<IActionResult> GetBookingById(string bookingId)
+        {
+            var query = new GetBookingByIdQuery
+            {
+                BookingId = bookingId
+            };
+
+            var result = await _mediator.Send(query);
+            return Success(result);
+        }
+
+        [HttpGet("evowner/{evOwnerNic}")]
+        public async Task<IActionResult> GetBookingsByEvOwner(string evOwnerNic)
+        {
+            var query = new GetBookingsByEvOwnerQuery
+            {
+                EvOwnerNic = evOwnerNic
+            };
+
+            var result = await _mediator.Send(query);
+            return Success(result);
+        }
+
+        [HttpPut("confirm")]
+        public async Task<IActionResult> ConfirmBooking([FromBody] ConfirmBookingRequestDto request)
+        {
+            var command = new ConfirmBookingCommand
+            {
+                BookingId = request.BookingId
+            };
+
+            var result = await _mediator.Send(command);
+            return Success("Booking confirmed successfully");
+        }
+
+        [HttpPut("complete")]
+        public async Task<IActionResult> CompleteBooking([FromBody] CompleteBookingRequestDto request)
+        {
+            var command = new CompleteBookingCommand
+            {
+                BookingId = request.BookingId
+            };
+
+            var result = await _mediator.Send(command);
+            return Success("Booking completed successfully");
+        }
+
     }
 }
