@@ -9,6 +9,12 @@ using WebAPI.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Configure Kestrel to work with IIS
+builder.WebHost.ConfigureKestrel(serverOptions =>
+{
+    serverOptions.AddServerHeader = false;
+});
+
 // Configure JWT settings
 var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>();
 var key = Encoding.UTF8.GetBytes(jwtSettings!.SecretKey);
@@ -69,7 +75,7 @@ builder.Services.AddInfrastructure(builder.Configuration);
 // Add CORS
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAll", policy =>
+    options.AddPolicy("AllowMobile", policy =>
     {
         policy.AllowAnyOrigin()
               .AllowAnyMethod()
@@ -86,11 +92,14 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseSwagger();
+app.UseSwaggerUI();
+
 // Add error handling middleware
 app.UseMiddleware<ErrorHandlingMiddleware>();
 
 app.UseHttpsRedirection();
-app.UseCors("AllowAll");
+app.UseCors("AllowMobile");
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();

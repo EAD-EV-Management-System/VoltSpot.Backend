@@ -58,6 +58,35 @@ namespace Infrastructure.Services
             return tokenHandler.WriteToken(token);
         }
 
+        public string GenerateAccessToken(EVOwner evOwner)
+        {
+            var claims = new List<Claim>
+            {
+                new(ClaimTypes.NameIdentifier, evOwner.Id),
+                new(ClaimTypes.Name, evOwner.NIC),
+                new(ClaimTypes.Email, evOwner.Email),
+                new(ClaimTypes.GivenName, evOwner.FirstName),
+                new(ClaimTypes.Surname, evOwner.LastName),
+                new(ClaimTypes.Role, "EVOwner"),
+                new("status", evOwner.Status.ToString()),
+                new("evOwnerId", evOwner.Id),
+                new("nic", evOwner.NIC)
+            };
+
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(claims),
+                Expires = DateTime.UtcNow.AddMinutes(_jwtSettings.AccessTokenExpirationMinutes),
+                Issuer = _jwtSettings.Issuer,
+                Audience = _jwtSettings.Audience,
+                SigningCredentials = new SigningCredentials(_key, SecurityAlgorithms.HmacSha256)
+            };
+
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+            return tokenHandler.WriteToken(token);
+        }
+
         public string GenerateRefreshToken()
         {
             var randomNumber = new byte[64];

@@ -27,5 +27,34 @@ namespace Domain.Entities
         [BsonElement("status")]
         [BsonRepresentation(MongoDB.Bson.BsonType.String)]
         public AccountStatus Status { get; set; } = AccountStatus.Active;
+
+        [BsonElement("lastLoginAt")]
+        public DateTime? LastLoginAt { get; set; }
+
+        [BsonElement("refreshToken")]
+        public string? RefreshToken { get; set; }
+
+        [BsonElement("refreshTokenExpiry")]
+        public DateTime? RefreshTokenExpiry { get; set; }
+
+        public void UpdateLastLogin()
+        {
+            LastLoginAt = DateTime.UtcNow;
+            UpdatedAt = DateTime.UtcNow;
+        }
+
+        public void SetRefreshToken(string token, DateTime expiry)
+        {
+            RefreshToken = token;
+            RefreshTokenExpiry = expiry;
+            UpdatedAt = DateTime.UtcNow;
+        }
+
+        public void ClearRefreshToken()
+        {
+            RefreshToken = null;
+            RefreshTokenExpiry = null;
+            UpdatedAt = DateTime.UtcNow;
+        }
     }
 }
