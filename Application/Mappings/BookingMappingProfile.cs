@@ -22,6 +22,7 @@ namespace Application.Mappings
 
             CreateMap<CreateBookingRequestDto, CreateBookingCommand>();
             CreateMap<CancelBookingRequestDto, CancelBookingCommand>();
+            CreateMap<UpdateBookingRequestDto, UpdateBookingCommand>();
         }
     }
 }
