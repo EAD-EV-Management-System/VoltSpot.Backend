@@ -42,5 +42,18 @@ namespace WebAPI.Controllers.V1
             var result = await _mediator.Send(command);
             return Success("Booking cancelled successfully");
         }
+
+        [HttpPut("update")]
+        public async Task<IActionResult> UpdateBooking([FromBody] UpdateBookingRequestDto request)
+        {
+            var command = new UpdateBookingCommand
+            {
+                BookingId = request.BookingId,
+                NewReservationDateTime = request.NewReservationDateTime
+            };
+
+            var result = await _mediator.Send(command);
+            return Success("Booking updated successfully");
+        }
     }
 }
