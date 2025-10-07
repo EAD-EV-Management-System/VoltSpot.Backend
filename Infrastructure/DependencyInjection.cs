@@ -48,6 +48,7 @@ namespace Infrastructure
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IEVOwnerRepository, EVOwnerRepository>();
             services.AddScoped<IBookingRepository, BookingRepository>();
+            services.AddScoped<IChargingStationRepository, ChargingStationRepository>();
 
             // Register services
             services.AddScoped<IJwtService, JwtService>();
