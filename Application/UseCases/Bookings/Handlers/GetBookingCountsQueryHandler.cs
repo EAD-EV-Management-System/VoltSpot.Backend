@@ -1,6 +1,7 @@
 using Application.UseCases.Bookings.Queries;
+using AutoMapper;
 using MediatR;
-using VoltSpot.Application.DTOs;
+using VoltSpot.Application.DTOs.Response.Bookings;
 using VoltSpot.Domain.Interfaces;
 
 namespace Application.UseCases.Bookings.Handlers
@@ -16,17 +17,19 @@ namespace Application.UseCases.Bookings.Handlers
 
         public async Task<BookingCountsDto> Handle(GetBookingCountsQuery request, CancellationToken cancellationToken)
         {
-            // Assuming repository supports a method to get count by status
-            var pending = await _bookingRepository.CountByStatusAsync("Pending", request.EvOwnerNic);
-            var approved = await _bookingRepository.CountByStatusAsync("Approved", request.EvOwnerNic);
-            var upcoming = await _bookingRepository.CountByStatusAsync("Upcoming", request.EvOwnerNic);
+            // Fetch counts in parallel for performance
+            var pendingTask = _bookingRepository.GetPendingCountAsync(request.EvOwnerNic);
+            var approvedTask = _bookingRepository.GetApprovedCountAsync(request.EvOwnerNic);
+            var upcomingTask = _bookingRepository.GetUpcomingCountAsync(request.EvOwnerNic);
+
+            await Task.WhenAll(pendingTask, approvedTask, upcomingTask);
 
             return new BookingCountsDto
             {
-                PendingCount = pending,
-                ApprovedCount = approved,
-                UpcomingCount = upcoming
+                PendingCount = pendingTask.Result,
+                ApprovedCount = approvedTask.Result,
+                UpcomingCount = upcomingTask.Result
             };
-        }
     }
+}
 }

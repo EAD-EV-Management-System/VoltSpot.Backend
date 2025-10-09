@@ -2,6 +2,7 @@ using AutoMapper;
 using MediatR;
 using VoltSpot.Application.DTOs;
 using VoltSpot.Domain.Interfaces;
+using Application.UseCases.Bookings.Queries;
 
 namespace Application.UseCases.Bookings.Handlers
 {
@@ -18,7 +19,8 @@ namespace Application.UseCases.Bookings.Handlers
 
         public async Task<List<BookingDetailDto>> Handle(GetUpcomingBookingsQuery request, CancellationToken cancellationToken)
         {
-            var bookings = await _bookingRepository.GetBookingsByStatusAsync("Upcoming", request.EvOwnerNic);
+            // ✅ Use the correct repository method
+            var bookings = await _bookingRepository.GetUpcomingBookingsAsync(request.EvOwnerNic);
             return _mapper.Map<List<BookingDetailDto>>(bookings);
         }
     }

@@ -1,3 +1,4 @@
+using Application.UseCases.Bookings.Queries;
 using AutoMapper;
 using MediatR;
 using VoltSpot.Application.DTOs;
@@ -18,7 +19,8 @@ namespace Application.UseCases.Bookings.Handlers
 
         public async Task<List<BookingDetailDto>> Handle(GetCancelledBookingsQuery request, CancellationToken cancellationToken)
         {
-            var bookings = await _bookingRepository.GetBookingsByStatusAsync("Cancelled", request.EvOwnerNic);
+            // ✅ Use the correct repository method
+            var bookings = await _bookingRepository.GetCancelledBookingsAsync(request.EvOwnerNic);
             return _mapper.Map<List<BookingDetailDto>>(bookings);
         }
     }

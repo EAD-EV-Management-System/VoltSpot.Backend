@@ -1,6 +1,7 @@
 ﻿using Domain.Entities;
 using Domain.Enums;
 using Infrastructure.Data.Context;
+using Infrastructure.Data.Repositories;
 using MongoDB.Driver;
 using VoltSpot.Domain.Interfaces;
 

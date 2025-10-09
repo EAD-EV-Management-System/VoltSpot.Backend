@@ -1,6 +1,6 @@
 using System;
 
-namespace VoltSpot.Application.DTOs
+namespace VoltSpot.Application.DTOs.Response.Bookings
 {
     public class BookingCountsDto
     {

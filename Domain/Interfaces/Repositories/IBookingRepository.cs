@@ -10,7 +10,6 @@ namespace VoltSpot.Domain.Interfaces
         Task<List<Booking>> GetBookingsByEvOwnerAsync(string evOwnerNic);
         Task<bool> IsSlotAvailableAsync(string chargingStationId, int slotNumber, DateTime reservationDateTime);
 
-        //  NEW METHODS
         Task<int> GetPendingCountAsync(string evOwnerNic);
         Task<int> GetApprovedCountAsync(string evOwnerNic);
         Task<int> GetUpcomingCountAsync(string evOwnerNic);

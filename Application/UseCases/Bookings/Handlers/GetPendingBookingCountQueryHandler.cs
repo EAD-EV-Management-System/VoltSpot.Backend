@@ -1,23 +1,26 @@
+using Application.UseCases.Bookings.Queries;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
-using Infrastructure.Common.Models;
-using VoltSpot.Application.DTOs;
 using VoltSpot.Domain.Interfaces;
+using Domain.Enums; // If you store BookingStatus as Enum
 
-namespace Application.UseCases.Bookings.Queries
+namespace Application.UseCases.Bookings.Handlers
 {
     public class GetPendingBookingCountQueryHandler : IRequestHandler<GetPendingBookingCountQuery, int>
     {
-        private readonly IApplicationDbContext _context;
+        private readonly IBookingRepository _bookingRepository;
 
-        public GetPendingBookingCountQueryHandler(IApplicationDbContext context)
+        public GetPendingBookingCountQueryHandler(IBookingRepository bookingRepository)
         {
-            _context = context;
+            _bookingRepository = bookingRepository;
         }
 
         public async Task<int> Handle(GetPendingBookingCountQuery request, CancellationToken cancellationToken)
         {
-            return await _context.Bookings.CountAsync(b => b.Status == "Pending", cancellationToken);
+            // Fetch bookings of the specific EV owner
+            var bookings = await _bookingRepository.GetBookingsByEvOwnerAsync(request.EvOwnerNic);
+
+            // Count only pending ones
+            return bookings.Count(b => b.Status == BookingStatus.Pending);
         }
     }
 }
