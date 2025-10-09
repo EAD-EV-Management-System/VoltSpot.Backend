@@ -14,17 +14,16 @@
       "dotnetRunMessages": true,
       "launchBrowser": true,
       "launchUrl": "swagger",
-      "applicationUrl": "http://localhost:5058",
+      "applicationUrl": "http://0.0.0.0:5058", 
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
-      }
+        "ASPNETCORE_ENVIRONMENT": "Development" }
     },
     "https": {
       "commandName": "Project",
       "dotnetRunMessages": true,
       "launchBrowser": true,
       "launchUrl": "swagger",
-      "applicationUrl": "https://localhost:7056;http://localhost:5058",
+      "applicationUrl": "https://0.0.0.0:7056;http://0.0.0.0:5058",  
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }

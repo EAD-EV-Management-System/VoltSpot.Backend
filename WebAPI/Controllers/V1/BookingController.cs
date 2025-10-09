@@ -109,5 +109,42 @@ namespace WebAPI.Controllers.V1
             return Success("Booking completed successfully");
         }
 
+        [Authorize]
+[HttpGet("counts")]
+public async Task<IActionResult> GetBookingCounts()
+{
+    var evOwnerNic = User.Claims.FirstOrDefault(c => c.Type == "nic")?.Value;
+    var result = await _mediator.Send(new GetBookingCountsQuery { EvOwnerNic = evOwnerNic });
+    return Success(result);
+}
+
+[Authorize]
+[HttpGet("upcoming")]
+public async Task<IActionResult> GetUpcomingBookings()
+{
+    var evOwnerNic = User.Claims.FirstOrDefault(c => c.Type == "nic")?.Value;
+    var result = await _mediator.Send(new GetUpcomingBookingsQuery { EvOwnerNic = evOwnerNic });
+    return Success(result);
+}
+
+[Authorize]
+[HttpGet("completed")]
+public async Task<IActionResult> GetCompletedBookings()
+{
+    var evOwnerNic = User.Claims.FirstOrDefault(c => c.Type == "nic")?.Value;
+    var result = await _mediator.Send(new GetCompletedBookingsQuery { EvOwnerNic = evOwnerNic });
+    return Success(result);
+}
+
+[Authorize]
+[HttpGet("cancelled")]
+public async Task<IActionResult> GetCancelledBookings()
+{
+    var evOwnerNic = User.Claims.FirstOrDefault(c => c.Type == "nic")?.Value;
+    var result = await _mediator.Send(new GetCancelledBookingsQuery { EvOwnerNic = evOwnerNic });
+    return Success(result);
+}
+
+
     }
 }

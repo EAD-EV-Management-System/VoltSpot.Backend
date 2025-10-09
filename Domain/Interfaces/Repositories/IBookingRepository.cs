@@ -7,11 +7,15 @@ namespace VoltSpot.Domain.Interfaces
         Task<Booking?> GetByIdAsync(string id);
         Task<Booking> AddAsync(Booking booking);
         Task<Booking> UpdateAsync(Booking booking);
-
-        /// Gets all bookings for a specific EV owner
         Task<List<Booking>> GetBookingsByEvOwnerAsync(string evOwnerNic);
-
-        /// Checks if a slot is available at specific time
         Task<bool> IsSlotAvailableAsync(string chargingStationId, int slotNumber, DateTime reservationDateTime);
+
+        //  NEW METHODS
+        Task<int> GetPendingCountAsync(string evOwnerNic);
+        Task<int> GetApprovedCountAsync(string evOwnerNic);
+        Task<int> GetUpcomingCountAsync(string evOwnerNic);
+        Task<List<Booking>> GetUpcomingBookingsAsync(string evOwnerNic);
+        Task<List<Booking>> GetCompletedBookingsAsync(string evOwnerNic);
+        Task<List<Booking>> GetCancelledBookingsAsync(string evOwnerNic);
     }
 }
