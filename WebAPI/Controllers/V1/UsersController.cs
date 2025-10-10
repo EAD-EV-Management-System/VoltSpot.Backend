@@ -28,6 +28,15 @@ namespace WebAPI.Controllers.V1
             return Success(users, "Users retrieved successfully");
         }
 
+        // ✅ TEST ENDPOINT - Remove after debugging
+        [HttpGet("test")]
+        [Authorize] // Only requires authentication, no specific role
+        public async Task<IActionResult> GetUsersTest([FromQuery] GetUsersQuery query)
+        {
+            var users = await _mediator.Send(query);
+            return Success(users, $"Users retrieved successfully (Test endpoint)");
+        }
+
         [HttpGet("{id}")]
         [RequireRole("Backoffice")]
         public async Task<IActionResult> GetUser(string id)

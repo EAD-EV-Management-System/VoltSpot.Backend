@@ -59,6 +59,69 @@ namespace Infrastructure.Data.Repositories
                                   .ToListAsync();
         }
 
+        // New comprehensive search method
+        public async Task<List<ChargingStation>> SearchAsync(
+            string? location = null,
+            ChargingType? type = null,
+            double? latitude = null,
+            double? longitude = null,
+            double? radiusKm = null,
+            bool? availableOnly = null,
+            decimal? maxPricePerHour = null,
+            int page = 1,
+            int pageSize = 20)
+        {
+            var filter = Builders<ChargingStation>.Filter.Eq(s => s.IsDeleted, false);
+
+            // Apply status filter (only active stations)
+            filter &= Builders<ChargingStation>.Filter.Eq(s => s.Status, StationStatus.Active);
+
+            // Apply type filter
+            if (type.HasValue)
+            {
+                filter &= Builders<ChargingStation>.Filter.Eq(s => s.Type, type.Value);
+            }
+
+            // Apply location text search
+            if (!string.IsNullOrEmpty(location))
+            {
+                var locationFilter = Builders<ChargingStation>.Filter.Or(
+                    Builders<ChargingStation>.Filter.Regex(s => s.Name, new MongoDB.Bson.BsonRegularExpression(location, "i")),
+                    Builders<ChargingStation>.Filter.Regex(s => s.Location, new MongoDB.Bson.BsonRegularExpression(location, "i"))
+                );
+                filter &= locationFilter;
+            }
+
+            // Apply availability filter
+            if (availableOnly == true)
+            {
+                filter &= Builders<ChargingStation>.Filter.Gt(s => s.AvailableSlots, 0);
+            }
+
+            // Apply price filter
+            if (maxPricePerHour.HasValue)
+            {
+                filter &= Builders<ChargingStation>.Filter.Lte(s => s.PricePerHour, maxPricePerHour.Value);
+            }
+
+            var stations = await _collection.Find(filter)
+                .Skip((page - 1) * pageSize)
+                .Limit(pageSize)
+                .ToListAsync();
+
+            // Apply geographical filtering if coordinates are provided
+            if (latitude.HasValue && longitude.HasValue && radiusKm.HasValue)
+            {
+                stations = stations.Where(station =>
+                {
+                    var distance = CalculateDistance(latitude.Value, longitude.Value, station.Latitude, station.Longitude);
+                    return distance <= radiusKm.Value;
+                }).ToList();
+            }
+
+            return stations;
+        }
+
         private static double CalculateDistance(double lat1, double lon1, double lat2, double lon2)
         {
             const double R = 6371; // Earth's radius in kilometers

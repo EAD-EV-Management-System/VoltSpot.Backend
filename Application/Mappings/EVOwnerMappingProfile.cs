@@ -15,6 +15,8 @@ namespace Application.Mappings
             CreateMap<RegisterEVOwnerRequestDto, RegisterEVOwnerCommand>();
 
             CreateMap<EVOwnerLoginRequestDto, LoginEVOwnerCommand>();
+            
+            CreateMap<UpdateEVOwnerRequestDto, UpdateEVOwnerCommand>();
         }
     }
 }

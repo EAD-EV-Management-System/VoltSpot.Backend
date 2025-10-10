@@ -16,5 +16,6 @@ namespace Domain.Interfaces.Repositories
         Task<bool> HasActiveBookingsAsync(string stationId);
         Task<bool> ExistsAsync(string id);
         Task<List<ChargingStation>> GetStationsByOperatorAsync(string operatorId);
+        Task<List<ChargingStation>> SearchAsync(string? location = null, ChargingType? type = null, double? latitude = null, double? longitude = null, double? radiusKm = null, bool? availableOnly = null, decimal? maxPricePerHour = null, int page = 1, int pageSize = 20);
     }
 }
