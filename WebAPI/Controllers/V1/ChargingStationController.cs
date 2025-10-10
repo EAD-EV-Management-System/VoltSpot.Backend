@@ -153,6 +153,63 @@ namespace WebAPI.Controllers.V1
         }
 
         /// <summary>
+        /// Search charging stations with advanced filtering
+        /// </summary>
+        [HttpGet("search")]
+        public async Task<IActionResult> SearchChargingStations(
+            [FromQuery] string? location = null,
+            [FromQuery] ChargingType? type = null,
+            [FromQuery] double? latitude = null,
+            [FromQuery] double? longitude = null,
+            [FromQuery] double? radiusKm = 10,
+            [FromQuery] bool? availableOnly = true,
+            [FromQuery] decimal? maxPricePerHour = null,
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 20)
+        {
+            var query = new SearchChargingStationsQuery
+            {
+                Location = location,
+                Type = type,
+                Latitude = latitude,
+                Longitude = longitude,
+                RadiusKm = radiusKm,
+                AvailableOnly = availableOnly,
+                MaxPricePerHour = maxPricePerHour,
+                Page = page,
+                PageSize = pageSize
+            };
+
+            var result = await _mediator.Send(query);
+            return Success(result);
+        }
+
+        /// <summary>
+        /// Get nearby charging stations based on location
+        /// </summary>
+        [HttpGet("nearby")]
+        public async Task<IActionResult> GetNearbyStations(
+            [FromQuery] double latitude,
+            [FromQuery] double longitude,
+            [FromQuery] double radiusKm = 10,
+            [FromQuery] bool availableOnly = true,
+            [FromQuery] int limit = 20)
+        {
+            var query = new SearchChargingStationsQuery
+            {
+                Latitude = latitude,
+                Longitude = longitude,
+                RadiusKm = radiusKm,
+                AvailableOnly = availableOnly,
+                Page = 1,
+                PageSize = limit
+            };
+
+            var result = await _mediator.Send(query);
+            return Success(result);
+        }
+
+        /// <summary>
         /// Get charging station by ID
         /// </summary>
         [HttpGet("{id}")]

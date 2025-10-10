@@ -32,6 +32,31 @@ namespace WebAPI.Controllers.V1
             return Success(result, "Booking created successfully");
         }
 
+        // ✅ NEW: Get all bookings for admin management
+        [HttpGet]
+        [Authorize(Roles = "Backoffice")]
+        public async Task<IActionResult> GetAllBookings(
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 50,
+            [FromQuery] string? status = null,
+            [FromQuery] string? evOwnerNic = null,
+            [FromQuery] DateTime? fromDate = null,
+            [FromQuery] DateTime? toDate = null)
+        {
+            var query = new GetAllBookingsQuery
+            {
+                Page = page,
+                PageSize = pageSize,
+                Status = status,
+                EvOwnerNic = evOwnerNic,
+                FromDate = fromDate,
+                ToDate = toDate
+            };
+
+            var result = await _mediator.Send(query);
+            return Success(result);
+        }
+
         [HttpPut("cancel")]
         public async Task<IActionResult> CancelBooking([FromBody] CancelBookingRequestDto request)
         {
@@ -80,6 +105,22 @@ namespace WebAPI.Controllers.V1
             var query = new GetBookingsByEvOwnerQuery
             {
                 EvOwnerNic = evOwnerNic
+            };
+
+            var result = await _mediator.Send(query);
+            return Success(result);
+        }
+
+        // ✅ NEW: Get bookings by user ID (mentioned in documentation)
+        [HttpGet("user/{userId}")]
+        [Authorize]
+        public async Task<IActionResult> GetBookingsByUserId(string userId)
+        {
+            // For now, assuming userId is the same as EvOwnerNic
+            // In a more complex system, you might need to map userId to EvOwnerNic
+            var query = new GetBookingsByEvOwnerQuery
+            {
+                EvOwnerNic = userId
             };
 
             var result = await _mediator.Send(query);
