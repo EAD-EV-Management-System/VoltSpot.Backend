@@ -39,7 +39,7 @@ namespace VoltSpot.Infrastructure.Repositories
         }
 
         // New method for admin view of all bookings with pagination and filtering
-        public async Task<List<Booking>> GetAllAsync(int page = 1, int pageSize = 50, string? status = null, string? evOwnerNic = null, DateTime? fromDate = null, DateTime? toDate = null)
+        public async Task<List<Booking>> GetAllAsync(int page = 1, int pageSize = 50, string? status = null, string? evOwnerNic = null, string? searchTerm = null, DateTime? fromDate = null, DateTime? toDate = null)
         {
             var filter = Builders<Booking>.Filter.Empty;
 
@@ -53,6 +53,17 @@ namespace VoltSpot.Infrastructure.Repositories
             if (!string.IsNullOrEmpty(evOwnerNic))
             {
                 filter &= Builders<Booking>.Filter.Eq(b => b.EvOwnerNic, evOwnerNic);
+            }
+
+            // Apply search term filter (search across multiple fields)
+            if (!string.IsNullOrEmpty(searchTerm))
+            {
+                var searchFilter = Builders<Booking>.Filter.Or(
+                    Builders<Booking>.Filter.Regex(b => b.Id, new MongoDB.Bson.BsonRegularExpression(searchTerm, "i")),
+                    Builders<Booking>.Filter.Regex(b => b.EvOwnerNic, new MongoDB.Bson.BsonRegularExpression(searchTerm, "i")),
+                    Builders<Booking>.Filter.Regex(b => b.ChargingStationId, new MongoDB.Bson.BsonRegularExpression(searchTerm, "i"))
+                );
+                filter &= searchFilter;
             }
 
             // Apply date range filter

@@ -28,6 +28,7 @@ namespace Application.UseCases.Bookings.Handlers
                 request.PageSize,
                 request.Status,
                 request.EvOwnerNic,
+                request.SearchTerm,
                 request.FromDate,
                 request.ToDate);
 

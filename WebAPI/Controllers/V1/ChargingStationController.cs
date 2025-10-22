@@ -158,6 +158,7 @@ namespace WebAPI.Controllers.V1
         [HttpGet("search")]
         public async Task<IActionResult> SearchChargingStations(
             [FromQuery] string? location = null,
+            [FromQuery] string? searchTerm = null,
             [FromQuery] ChargingType? type = null,
             [FromQuery] double? latitude = null,
             [FromQuery] double? longitude = null,
@@ -169,7 +170,7 @@ namespace WebAPI.Controllers.V1
         {
             var query = new SearchChargingStationsQuery
             {
-                Location = location,
+                Location = location ?? searchTerm, // Use searchTerm as location if location not provided
                 Type = type,
                 Latitude = latitude,
                 Longitude = longitude,

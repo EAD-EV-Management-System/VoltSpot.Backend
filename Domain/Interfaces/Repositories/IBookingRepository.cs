@@ -11,7 +11,7 @@ namespace VoltSpot.Domain.Interfaces
         Task<bool> IsSlotAvailableAsync(string chargingStationId, int slotNumber, DateTime reservationDateTime);
 
         // New method for admin view of all bookings
-        Task<List<Booking>> GetAllAsync(int page = 1, int pageSize = 50, string? status = null, string? evOwnerNic = null, DateTime? fromDate = null, DateTime? toDate = null);
+        Task<List<Booking>> GetAllAsync(int page = 1, int pageSize = 50, string? status = null, string? evOwnerNic = null, string? searchTerm = null, DateTime? fromDate = null, DateTime? toDate = null);
         
         // Additional methods for dashboard
         Task<List<Booking>> GetAllAsync();

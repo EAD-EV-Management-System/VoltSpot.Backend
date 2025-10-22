@@ -67,6 +67,7 @@ namespace WebAPI.Controllers.V1
             [FromQuery] int pageSize = 50,
             [FromQuery] string? status = null,
             [FromQuery] string? evOwnerNic = null,
+            [FromQuery] string? searchTerm = null,
             [FromQuery] DateTime? fromDate = null,
             [FromQuery] DateTime? toDate = null)
         {
@@ -76,6 +77,7 @@ namespace WebAPI.Controllers.V1
                 PageSize = pageSize,
                 Status = status,
                 EvOwnerNic = evOwnerNic,
+                SearchTerm = searchTerm,
                 FromDate = fromDate,
                 ToDate = toDate
             };
@@ -127,11 +129,16 @@ namespace WebAPI.Controllers.V1
         }
 
         [HttpGet("evowner/{evOwnerNic}")]
-        public async Task<IActionResult> GetBookingsByEvOwner(string evOwnerNic)
+        public async Task<IActionResult> GetBookingsByEvOwner(
+            string evOwnerNic,
+            [FromQuery] string? searchTerm = null,
+            [FromQuery] string? status = null)
         {
             var query = new GetBookingsByEvOwnerQuery
             {
-                EvOwnerNic = evOwnerNic
+                EvOwnerNic = evOwnerNic,
+                SearchTerm = searchTerm,
+                Status = status
             };
 
             var result = await _mediator.Send(query);

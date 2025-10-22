@@ -9,6 +9,7 @@ namespace Application.UseCases.Bookings.Queries
         public int PageSize { get; set; } = 50;
         public string? Status { get; set; }
         public string? EvOwnerNic { get; set; }
+        public string? SearchTerm { get; set; }
         public DateTime? FromDate { get; set; }
         public DateTime? ToDate { get; set; }
     }
