@@ -136,5 +136,44 @@ namespace VoltSpot.Infrastructure.Repositories
                 .SortByDescending(b => b.ReservationDateTime)
                 .ToListAsync();
         }
+
+        // ✅ NEW: Get bookings by station and date range for slot availability checking
+        public async Task<List<Booking>> GetBookingsByStationAndDateRangeAsync(string stationId, DateTime startDate, DateTime endDate)
+        {
+            var filter = Builders<Booking>.Filter.And(
+                Builders<Booking>.Filter.Eq(b => b.ChargingStationId, stationId),
+                Builders<Booking>.Filter.Gte(b => b.ReservationDateTime, startDate),
+                Builders<Booking>.Filter.Lt(b => b.ReservationDateTime, endDate),
+                Builders<Booking>.Filter.Or(
+                    Builders<Booking>.Filter.Eq(b => b.Status, BookingStatus.Confirmed),
+                    Builders<Booking>.Filter.Eq(b => b.Status, BookingStatus.Pending)
+                )
+            );
+
+            return await _collection.Find(filter)
+                .SortBy(b => b.ReservationDateTime)
+                .ToListAsync();
+        }
+
+        // ✅ NEW: Get overlapping bookings for validation
+        public async Task<List<Booking>> GetOverlappingBookingsAsync(string stationId, int slotNumber, DateTime startTime, DateTime endTime)
+        {
+            var bookings = await _collection.Find(b =>
+                b.ChargingStationId == stationId &&
+                b.SlotNumber == slotNumber &&
+                (b.Status == BookingStatus.Confirmed || b.Status == BookingStatus.Pending))
+                .ToListAsync();
+
+            // Filter for actual time overlap
+            // A booking overlaps if it starts before our end time AND ends after our start time
+            var overlapping = bookings.Where(b =>
+            {
+                // Assuming default 2 hour duration if not specified
+                var bookingEndTime = b.ReservationDateTime.AddHours(2);
+                return b.ReservationDateTime < endTime && bookingEndTime > startTime;
+            }).ToList();
+
+            return overlapping;
+        }
     }
 }

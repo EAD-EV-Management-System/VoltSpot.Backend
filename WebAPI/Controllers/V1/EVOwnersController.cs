@@ -59,6 +59,16 @@ namespace WebAPI.Controllers.V1
             return Success(result);
         }
 
+        // ? NEW: Get dashboard statistics for an EV owner
+        [HttpGet("{nic}/dashboard-stats")]
+        [Authorize]
+        public async Task<IActionResult> GetDashboardStats(string nic)
+        {
+            var query = new GetEVOwnerDashboardStatsQuery { EvOwnerNic = nic };
+            var result = await _mediator.Send(query);
+            return Success(result, "Dashboard statistics retrieved successfully");
+        }
+
         // ? NEW: Get current EV owner profile
         [HttpGet("me")]
         [Authorize]

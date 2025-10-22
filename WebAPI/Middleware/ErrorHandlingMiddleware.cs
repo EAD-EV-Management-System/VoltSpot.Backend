@@ -1,5 +1,6 @@
 ﻿using System.Net;
 using System.Text.Json;
+using FluentValidation;
 
 namespace WebAPI.Middleware
 {
@@ -31,12 +32,40 @@ namespace WebAPI.Middleware
         {
             context.Response.ContentType = "application/json";
 
+            // Handle FluentValidation.ValidationException with structured errors
+            if (exception is ValidationException validationEx)
+            {
+                context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
+
+                // Build field-specific error dictionary
+                var errors = new Dictionary<string, string>();
+                foreach (var error in validationEx.Errors)
+                {
+                    if (!errors.ContainsKey(error.PropertyName))
+                    {
+                        errors[error.PropertyName] = error.ErrorMessage;
+                    }
+                }
+
+                var response = new
+                {
+                    Success = false,
+                    Message = "Validation failed",
+                    Errors = errors
+                };
+
+                var jsonResponse = JsonSerializer.Serialize(response, new JsonSerializerOptions
+                {
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+                });
+
+                await context.Response.WriteAsync(jsonResponse);
+                return;
+            }
+
+            // Handle other exceptions
             var (statusCode, message) = exception switch
             {
-                FluentValidation.ValidationException validationEx => (
-                    (int)HttpStatusCode.BadRequest,
-                    validationEx.Message
-                ),
                 UnauthorizedAccessException => (
                     (int)HttpStatusCode.Unauthorized,
                     exception.Message
@@ -61,18 +90,18 @@ namespace WebAPI.Middleware
 
             context.Response.StatusCode = statusCode;
 
-            var response = new
+            var standardResponse = new
             {
                 Success = false,
                 Message = message
             };
 
-            var jsonResponse = JsonSerializer.Serialize(response, new JsonSerializerOptions
+            var standardJsonResponse = JsonSerializer.Serialize(standardResponse, new JsonSerializerOptions
             {
                 PropertyNamingPolicy = JsonNamingPolicy.CamelCase
             });
 
-            await context.Response.WriteAsync(jsonResponse);
+            await context.Response.WriteAsync(standardJsonResponse);
         }
     }
 }

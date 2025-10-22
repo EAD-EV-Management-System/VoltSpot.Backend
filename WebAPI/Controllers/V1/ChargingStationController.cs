@@ -238,6 +238,60 @@ namespace WebAPI.Controllers.V1
         }
 
         /// <summary>
+        /// Get available slots for a charging station on a specific date/time
+        /// </summary>
+        [HttpGet("{id}/available-slots")]
+        public async Task<IActionResult> GetAvailableSlots(
+            string id,
+            [FromQuery] string date,
+            [FromQuery] string? time = null)
+        {
+            try
+            {
+                // Validate ObjectId format
+                if (!ObjectId.TryParse(id, out _))
+                {
+                    return Error("Invalid station ID format");
+                }
+
+                // Parse date
+                if (!DateTime.TryParse(date, out var parsedDate))
+                {
+                    return Error("Invalid date format. Please use YYYY-MM-DD format");
+                }
+
+                // Parse time if provided
+                TimeSpan? parsedTime = null;
+                if (!string.IsNullOrEmpty(time))
+                {
+                    if (!TimeSpan.TryParse(time, out var timeSpan))
+                    {
+                        return Error("Invalid time format. Please use HH:mm format");
+                    }
+                    parsedTime = timeSpan;
+                }
+
+                var query = new GetAvailableSlotsQuery
+                {
+                    StationId = id,
+                    Date = parsedDate,
+                    Time = parsedTime
+                };
+
+                var result = await _mediator.Send(query);
+                return Success(result, "Available slots retrieved successfully");
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return Error("An internal server error occurred", 500);
+            }
+        }
+
+        /// <summary>
         /// Update slot availability (Station Operator or Backoffice)
         /// </summary>
         [HttpPatch("{id}/slots")]

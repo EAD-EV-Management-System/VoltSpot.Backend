@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using VoltSpot.Application.DTOs;
 using WebAPI.Controllers.Base;
+using Application.DTOs.Request.Bookings;
 
 namespace WebAPI.Controllers.V1
 {
@@ -30,6 +31,32 @@ namespace WebAPI.Controllers.V1
 
             var result = await _mediator.Send(command);
             return Success(result, "Booking created successfully");
+        }
+
+        // ✅ NEW: Validate booking before creation
+        [HttpPost("validate")]
+        [Authorize]
+        public async Task<IActionResult> ValidateBooking([FromBody] ValidateBookingRequestDto request)
+        {
+            var command = new ValidateBookingCommand
+            {
+                ChargingStationId = request.ChargingStationId,
+                SlotNumber = request.SlotNumber,
+                ReservationDateTime = request.ReservationDateTime,
+                Duration = request.Duration,
+                EvOwnerNic = request.EvOwnerNic
+            };
+
+            var result = await _mediator.Send(command);
+            
+            if (result.CanBook)
+            {
+                return Success(result, "Booking is valid and can be created");
+            }
+            else
+            {
+                return Success(result, "Booking validation completed with issues");
+            }
         }
 
         // ✅ NEW: Get all bookings for admin management

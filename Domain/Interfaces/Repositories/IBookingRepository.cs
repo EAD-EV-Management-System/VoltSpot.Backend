@@ -24,5 +24,11 @@ namespace VoltSpot.Domain.Interfaces
         Task<List<Booking>> GetUpcomingBookingsAsync(string evOwnerNic);
         Task<List<Booking>> GetCompletedBookingsAsync(string evOwnerNic);
         Task<List<Booking>> GetCancelledBookingsAsync(string evOwnerNic);
+
+        // ✅ NEW: Get bookings by station and date range for slot availability checking
+        Task<List<Booking>> GetBookingsByStationAndDateRangeAsync(string stationId, DateTime startDate, DateTime endDate);
+        
+        // ✅ NEW: Get overlapping bookings for validation
+        Task<List<Booking>> GetOverlappingBookingsAsync(string stationId, int slotNumber, DateTime startTime, DateTime endTime);
     }
 }
