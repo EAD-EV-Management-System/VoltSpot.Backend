@@ -153,6 +153,64 @@ namespace WebAPI.Controllers.V1
         }
 
         /// <summary>
+        /// Search charging stations with advanced filtering
+        /// </summary>
+        [HttpGet("search")]
+        public async Task<IActionResult> SearchChargingStations(
+            [FromQuery] string? location = null,
+            [FromQuery] string? searchTerm = null,
+            [FromQuery] ChargingType? type = null,
+            [FromQuery] double? latitude = null,
+            [FromQuery] double? longitude = null,
+            [FromQuery] double? radiusKm = 10,
+            [FromQuery] bool? availableOnly = true,
+            [FromQuery] decimal? maxPricePerHour = null,
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 20)
+        {
+            var query = new SearchChargingStationsQuery
+            {
+                Location = location ?? searchTerm, // Use searchTerm as location if location not provided
+                Type = type,
+                Latitude = latitude,
+                Longitude = longitude,
+                RadiusKm = radiusKm,
+                AvailableOnly = availableOnly,
+                MaxPricePerHour = maxPricePerHour,
+                Page = page,
+                PageSize = pageSize
+            };
+
+            var result = await _mediator.Send(query);
+            return Success(result);
+        }
+
+        /// <summary>
+        /// Get nearby charging stations based on location
+        /// </summary>
+        [HttpGet("nearby")]
+        public async Task<IActionResult> GetNearbyStations(
+            [FromQuery] double latitude,
+            [FromQuery] double longitude,
+            [FromQuery] double radiusKm = 10,
+            [FromQuery] bool availableOnly = true,
+            [FromQuery] int limit = 20)
+        {
+            var query = new SearchChargingStationsQuery
+            {
+                Latitude = latitude,
+                Longitude = longitude,
+                RadiusKm = radiusKm,
+                AvailableOnly = availableOnly,
+                Page = 1,
+                PageSize = limit
+            };
+
+            var result = await _mediator.Send(query);
+            return Success(result);
+        }
+
+        /// <summary>
         /// Get charging station by ID
         /// </summary>
         [HttpGet("{id}")]
@@ -173,6 +231,60 @@ namespace WebAPI.Controllers.V1
                     return NotFound("Charging station not found");
                     
                 return Success(result);
+            }
+            catch (Exception ex)
+            {
+                return Error("An internal server error occurred", 500);
+            }
+        }
+
+        /// <summary>
+        /// Get available slots for a charging station on a specific date/time
+        /// </summary>
+        [HttpGet("{id}/available-slots")]
+        public async Task<IActionResult> GetAvailableSlots(
+            string id,
+            [FromQuery] string date,
+            [FromQuery] string? time = null)
+        {
+            try
+            {
+                // Validate ObjectId format
+                if (!ObjectId.TryParse(id, out _))
+                {
+                    return Error("Invalid station ID format");
+                }
+
+                // Parse date
+                if (!DateTime.TryParse(date, out var parsedDate))
+                {
+                    return Error("Invalid date format. Please use YYYY-MM-DD format");
+                }
+
+                // Parse time if provided
+                TimeSpan? parsedTime = null;
+                if (!string.IsNullOrEmpty(time))
+                {
+                    if (!TimeSpan.TryParse(time, out var timeSpan))
+                    {
+                        return Error("Invalid time format. Please use HH:mm format");
+                    }
+                    parsedTime = timeSpan;
+                }
+
+                var query = new GetAvailableSlotsQuery
+                {
+                    StationId = id,
+                    Date = parsedDate,
+                    Time = parsedTime
+                };
+
+                var result = await _mediator.Send(query);
+                return Success(result, "Available slots retrieved successfully");
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
             }
             catch (Exception ex)
             {
