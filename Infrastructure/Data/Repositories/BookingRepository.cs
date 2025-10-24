@@ -9,7 +9,12 @@ namespace VoltSpot.Infrastructure.Repositories
 {
     public class BookingRepository : BaseRepository<Booking>, IBookingRepository
     {
-        public BookingRepository(AppDbContext context) : base(context.Bookings) { }
+        private readonly AppDbContext _context;
+
+        public BookingRepository(AppDbContext context) : base(context.Bookings)
+        {
+            _context = context;
+        }
 
         public async Task<List<Booking>> GetBookingsByEvOwnerAsync(string evOwnerNic)
         {
@@ -18,9 +23,53 @@ namespace VoltSpot.Infrastructure.Repositories
                 .ToListAsync();
         }
 
-        /// <summary>
-        /// Legacy method - checks exact time match only
-        /// </summary>
+        public async Task<List<Booking>> GetBookingsByOperatorAsync(string operatorId)
+        {
+            // First, get all charging stations assigned to this operator
+            var operatorStations = await _context.ChargingStations
+                .Find(s => s.AssignedOperatorIds.Contains(operatorId))
+                .ToListAsync();
+
+            var stationIds = operatorStations.Select(s => s.Id).ToList();
+
+            if (!stationIds.Any())
+            {
+                return new List<Booking>();
+            }
+
+            // Use aggregation to get bookings for these stations with ChargingStation details populated
+            var pipeline = new[]
+            {
+                // Match bookings for the operator's stations
+                new MongoDB.Bson.BsonDocument("$match", new MongoDB.Bson.BsonDocument
+                {
+                    { "chargingStationId", new MongoDB.Bson.BsonDocument("$in", new MongoDB.Bson.BsonArray(stationIds)) }
+                }),
+
+                // Lookup (join) with ChargingStations collection
+                new MongoDB.Bson.BsonDocument("$lookup", new MongoDB.Bson.BsonDocument
+                {
+                    { "from", "ChargingStations" },
+                    { "localField", "chargingStationId" },
+                    { "foreignField", "_id" },
+                    { "as", "chargingStation" }
+                }),
+
+                // Unwind the array (converts array to single object)
+                new MongoDB.Bson.BsonDocument("$unwind", new MongoDB.Bson.BsonDocument
+                {
+                    { "path", "$chargingStation" },
+                    { "preserveNullAndEmptyArrays", true }
+                }),
+
+                // Sort by creation date descending
+                new MongoDB.Bson.BsonDocument("$sort", new MongoDB.Bson.BsonDocument("createdAt", -1))
+            };
+
+            var result = await _collection.Aggregate<Booking>(pipeline).ToListAsync();
+            return result;
+        }
+
         public async Task<bool> IsSlotAvailableAsync(string chargingStationId, int slotNumber, DateTime reservationDateTime)
         {
             var existingBooking = await _collection.Find(b =>

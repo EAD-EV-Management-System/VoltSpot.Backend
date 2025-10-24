@@ -163,6 +163,22 @@ namespace WebAPI.Controllers.V1
             return Success(result);
         }
 
+        /// <summary>
+        /// Get bookings for charging stations assigned to a specific operator
+        /// </summary>
+        [HttpGet("operator/{operatorId}")]
+        [Authorize(Roles = "Backoffice,StationOperator")]
+        public async Task<IActionResult> GetBookingsByOperator(string operatorId)
+        {
+            var query = new GetBookingsByOperatorQuery
+            {
+                OperatorId = operatorId
+            };
+
+            var result = await _mediator.Send(query);
+            return Success(result, $"Retrieved {result.Count} bookings for operator's stations");
+        }
+
         [HttpPut("confirm")]
         public async Task<IActionResult> ConfirmBooking([FromBody] ConfirmBookingRequestDto request)
         {

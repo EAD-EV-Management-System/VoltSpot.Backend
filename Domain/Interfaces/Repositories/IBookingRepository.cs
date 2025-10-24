@@ -8,10 +8,7 @@ namespace VoltSpot.Domain.Interfaces
         Task<Booking> AddAsync(Booking booking);
         Task<Booking> UpdateAsync(Booking booking);
         Task<List<Booking>> GetBookingsByEvOwnerAsync(string evOwnerNic);
-        
-        /// <summary>
-        /// Checks if a slot is available for the exact reservation time (legacy - exact match only)
-        /// </summary>
+        Task<List<Booking>> GetBookingsByOperatorAsync(string operatorId);
         Task<bool> IsSlotAvailableAsync(string chargingStationId, int slotNumber, DateTime reservationDateTime);
 
         /// <summary>
