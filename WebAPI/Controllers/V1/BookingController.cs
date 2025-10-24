@@ -61,7 +61,7 @@ namespace WebAPI.Controllers.V1
 
         // ✅ NEW: Get all bookings for admin management
         [HttpGet]
-        [Authorize(Roles = "Backoffice")]
+        //[Authorize(Roles = "Backoffice")]
         public async Task<IActionResult> GetAllBookings(
             [FromQuery] int page = 1,
             [FromQuery] int pageSize = 50,
