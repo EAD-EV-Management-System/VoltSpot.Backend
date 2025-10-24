@@ -48,13 +48,14 @@ namespace Application.UseCases.ChargingStations.Handlers
 
             if (request.Time.HasValue)
             {
-                // Check availability at specific time
+                // Check availability at specific time with requested duration
                 var requestedDateTime = request.Date.Date.Add(request.Time.Value);
-                var requestedEndTime = requestedDateTime.AddHours(2); // Assuming 2-hour duration
+                var requestedEndTime = requestedDateTime.AddMinutes(request.DurationInMinutes);
 
                 foreach (var booking in bookingsOnDate)
                 {
-                    var bookingEndTime = booking.ReservationDateTime.AddHours(2);
+                    // Use the actual DurationInMinutes field from the booking
+                    var bookingEndTime = booking.ReservationDateTime.AddMinutes(booking.DurationInMinutes);
                     
                     // Check if times overlap
                     if (booking.ReservationDateTime < requestedEndTime && bookingEndTime > requestedDateTime)
@@ -82,7 +83,8 @@ namespace Application.UseCases.ChargingStations.Handlers
                 {
                     var evOwner = await _evOwnerRepository.GetByNICAsync(booking.EvOwnerNic);
                     var maskedName = MaskName(evOwner?.FirstName + " " + evOwner?.LastName);
-                    var bookingEndTime = booking.ReservationDateTime.AddHours(2);
+                    // Use the actual DurationInMinutes field from the booking
+                    var bookingEndTime = booking.ReservationDateTime.AddMinutes(booking.DurationInMinutes);
 
                     bookedSlotDetails.Add(new BookedSlotDto
                     {

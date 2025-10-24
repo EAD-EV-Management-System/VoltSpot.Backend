@@ -8,7 +8,23 @@ namespace VoltSpot.Domain.Interfaces
         Task<Booking> AddAsync(Booking booking);
         Task<Booking> UpdateAsync(Booking booking);
         Task<List<Booking>> GetBookingsByEvOwnerAsync(string evOwnerNic);
+        
+        /// <summary>
+        /// Checks if a slot is available for the exact reservation time (legacy - exact match only)
+        /// </summary>
         Task<bool> IsSlotAvailableAsync(string chargingStationId, int slotNumber, DateTime reservationDateTime);
+
+        /// <summary>
+        /// Checks if a slot is available for a time period based on start time and duration
+        /// Returns true if no overlapping bookings exist
+        /// </summary>
+        Task<bool> IsSlotAvailableForDurationAsync(string chargingStationId, int slotNumber, DateTime startTime, int durationInMinutes);
+
+        /// <summary>
+        /// Checks if a slot is available for a time period based on start time and duration, excluding a specific booking
+        /// Returns true if no overlapping bookings exist (used for update scenarios)
+        /// </summary>
+        Task<bool> IsSlotAvailableForDurationAsync(string chargingStationId, int slotNumber, DateTime startTime, int durationInMinutes, string excludeBookingId);
 
         // New method for admin view of all bookings
         Task<List<Booking>> GetAllAsync(int page = 1, int pageSize = 50, string? status = null, string? evOwnerNic = null, string? searchTerm = null, DateTime? fromDate = null, DateTime? toDate = null);
@@ -25,10 +41,10 @@ namespace VoltSpot.Domain.Interfaces
         Task<List<Booking>> GetCompletedBookingsAsync(string evOwnerNic);
         Task<List<Booking>> GetCancelledBookingsAsync(string evOwnerNic);
 
-        // ✅ NEW: Get bookings by station and date range for slot availability checking
+        // ✅ Get bookings by station and date range for slot availability checking
         Task<List<Booking>> GetBookingsByStationAndDateRangeAsync(string stationId, DateTime startDate, DateTime endDate);
         
-        // ✅ NEW: Get overlapping bookings for validation
+        // ✅ Get overlapping bookings for validation
         Task<List<Booking>> GetOverlappingBookingsAsync(string stationId, int slotNumber, DateTime startTime, DateTime endTime);
     }
 }
