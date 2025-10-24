@@ -12,7 +12,7 @@ using FluentValidation;
 
 namespace WebAPI.Controllers.V1
 {
-    [Authorize]
+    //[Authorize]
     public class ChargingStationController : BaseController
     {
         private readonly IMediator _mediator;

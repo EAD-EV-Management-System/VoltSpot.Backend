@@ -14,12 +14,25 @@ namespace Infrastructure.Data.Repositories
 
         public virtual async Task<T?> GetByIdAsync(string id)
         {
-            return await _collection.Find(x => x.Id == id && !x.IsDeleted).FirstOrDefaultAsync();
+            var filterBuilder = Builders<T>.Filter;
+            var filter = filterBuilder.And(
+                filterBuilder.Eq(x => x.Id, id),
+                filterBuilder.Or(
+                    filterBuilder.Eq(x => x.IsDeleted, false),
+                    filterBuilder.Exists(x => x.IsDeleted, false)
+                )
+            );
+            return await _collection.Find(filter).FirstOrDefaultAsync();
         }
 
         public virtual async Task<IEnumerable<T>> GetAllAsync()
         {
-            return await _collection.Find(x => !x.IsDeleted).ToListAsync();
+            var filterBuilder = Builders<T>.Filter;
+            var filter = filterBuilder.Or(
+                filterBuilder.Eq(x => x.IsDeleted, false),
+                filterBuilder.Exists(x => x.IsDeleted, false)
+            );
+            return await _collection.Find(filter).ToListAsync();
         }
 
         public virtual async Task<T> AddAsync(T entity)
@@ -47,7 +60,15 @@ namespace Infrastructure.Data.Repositories
 
         public virtual async Task<bool> ExistsAsync(string id)
         {
-            return await _collection.CountDocumentsAsync(x => x.Id == id && !x.IsDeleted) > 0;
+            var filterBuilder = Builders<T>.Filter;
+            var filter = filterBuilder.And(
+                filterBuilder.Eq(x => x.Id, id),
+                filterBuilder.Or(
+                    filterBuilder.Eq(x => x.IsDeleted, false),
+                    filterBuilder.Exists(x => x.IsDeleted, false)
+                )
+            );
+            return await _collection.CountDocumentsAsync(filter) > 0;
         }
     }
 }

@@ -10,7 +10,7 @@ using WebAPI.Controllers.Base;
 
 namespace WebAPI.Controllers.V1
 {
-    [Authorize]
+    //[Authorize]
     public class UsersController : BaseController
     {
         private readonly IMediator _mediator;
@@ -21,7 +21,7 @@ namespace WebAPI.Controllers.V1
         }
 
         [HttpGet]
-        [RequireRole("Backoffice")]
+        //[RequireRole("Backoffice")]
         public async Task<IActionResult> GetUsers([FromQuery] GetUsersQuery query)
         {
             var users = await _mediator.Send(query);

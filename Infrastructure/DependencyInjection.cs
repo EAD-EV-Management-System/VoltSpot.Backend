@@ -63,7 +63,7 @@ namespace Infrastructure
             {
                 new CamelCaseElementNameConvention(),
                 new IgnoreExtraElementsConvention(true),
-                new IgnoreIfDefaultConvention(true),
+                // Removed IgnoreIfDefaultConvention to ensure isDeleted field is always stored
                 new EnumRepresentationConvention(MongoDB.Bson.BsonType.String)
             };
 

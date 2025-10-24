@@ -15,26 +15,51 @@ namespace Infrastructure.Data.Repositories
 
         public async Task<User?> GetByUsernameAsync(string username)
         {
-            return await _collection.Find(x => x.Username == username && !x.IsDeleted)
-                                  .FirstOrDefaultAsync();
+            var filterBuilder = Builders<User>.Filter;
+            var filter = filterBuilder.And(
+                filterBuilder.Eq(x => x.Username, username),
+                filterBuilder.Or(
+                    filterBuilder.Eq(x => x.IsDeleted, false),
+                    filterBuilder.Exists(x => x.IsDeleted, false)
+                )
+            );
+            return await _collection.Find(filter).FirstOrDefaultAsync();
         }
 
         public async Task<User?> GetByEmailAsync(string email)
         {
-            return await _collection.Find(x => x.Email == email && !x.IsDeleted)
-                                  .FirstOrDefaultAsync();
+            var filterBuilder = Builders<User>.Filter;
+            var filter = filterBuilder.And(
+                filterBuilder.Eq(x => x.Email, email),
+                filterBuilder.Or(
+                    filterBuilder.Eq(x => x.IsDeleted, false),
+                    filterBuilder.Exists(x => x.IsDeleted, false)
+                )
+            );
+            return await _collection.Find(filter).FirstOrDefaultAsync();
         }
 
         public async Task<IEnumerable<User>> GetByRoleAsync(UserRole role)
         {
-            return await _collection.Find(x => x.Role == role && !x.IsDeleted)
-                                  .ToListAsync();
+            var filterBuilder = Builders<User>.Filter;
+            var filter = filterBuilder.And(
+                filterBuilder.Eq(x => x.Role, role),
+                filterBuilder.Or(
+                    filterBuilder.Eq(x => x.IsDeleted, false),
+                    filterBuilder.Exists(x => x.IsDeleted, false)
+                )
+            );
+            return await _collection.Find(filter).ToListAsync();
         }
 
         public async Task<IEnumerable<User>> GetUsersAsync(UserRole? role = null, AccountStatus? status = null, string? searchTerm = null)
         {
             var filterBuilder = Builders<User>.Filter;
-            var filter = filterBuilder.Eq(u => u.IsDeleted, false);
+            // Handle both cases: documents where isDeleted field exists OR doesn't exist (for backwards compatibility)
+            var filter = filterBuilder.Or(
+                filterBuilder.Eq(u => u.IsDeleted, false),
+                filterBuilder.Exists(u => u.IsDeleted, false) // Field doesn't exist (old documents)
+            );
 
             if (role.HasValue)
             {
@@ -62,12 +87,28 @@ namespace Infrastructure.Data.Repositories
 
         public async Task<bool> ExistsByUsernameAsync(string username)
         {
-            return await _collection.CountDocumentsAsync(x => x.Username == username && !x.IsDeleted) > 0;
+            var filterBuilder = Builders<User>.Filter;
+            var filter = filterBuilder.And(
+                filterBuilder.Eq(x => x.Username, username),
+                filterBuilder.Or(
+                    filterBuilder.Eq(x => x.IsDeleted, false),
+                    filterBuilder.Exists(x => x.IsDeleted, false)
+                )
+            );
+            return await _collection.CountDocumentsAsync(filter) > 0;
         }
 
         public async Task<bool> ExistsByEmailAsync(string email)
         {
-            return await _collection.CountDocumentsAsync(x => x.Email == email && !x.IsDeleted) > 0;
+            var filterBuilder = Builders<User>.Filter;
+            var filter = filterBuilder.And(
+                filterBuilder.Eq(x => x.Email, email),
+                filterBuilder.Or(
+                    filterBuilder.Eq(x => x.IsDeleted, false),
+                    filterBuilder.Exists(x => x.IsDeleted, false)
+                )
+            );
+            return await _collection.CountDocumentsAsync(filter) > 0;
         }
     }
 }
