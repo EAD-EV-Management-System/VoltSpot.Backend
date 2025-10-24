@@ -9,9 +9,12 @@ namespace Infrastructure.Data.Repositories
 {
     public class ChargingStationRepository : BaseRepository<ChargingStation>, IChargingStationRepository
     {        
+        private readonly AppDbContext _context;
+
         public ChargingStationRepository(AppDbContext context) 
             : base(context.ChargingStations)
         {
+            _context = context;
         }
 
         public async Task<List<ChargingStation>> GetActiveStationsAsync()
@@ -46,9 +49,8 @@ namespace Infrastructure.Data.Repositories
                 Builders<Booking>.Filter.In(b => b.Status, new[] { BookingStatus.Pending, BookingStatus.Confirmed })
             );
 
-            // Access the bookings collection directly from the database
-            var bookingsCollection = _collection.Database.GetCollection<Booking>("Bookings");
-            var activeBooking = await bookingsCollection.Find(filter).FirstOrDefaultAsync();
+            // Access the bookings collection from the context
+            var activeBooking = await _context.Bookings.Find(filter).FirstOrDefaultAsync();
             
             return activeBooking != null;
         }
