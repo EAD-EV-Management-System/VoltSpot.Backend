@@ -137,6 +137,33 @@ namespace WebAPI.Controllers.V1
             return Success("EV Owner deleted successfully");
         }
 
+        // ? Deactivate EV owner account - can be done by the EV owner themselves
+        [HttpPatch("me/deactivate")]
+        [Authorize]
+        public async Task<IActionResult> DeactivateCurrentEVOwner()
+        {
+            var evOwnerNic = User.Claims.FirstOrDefault(c => c.Type == "nic")?.Value;
+
+            if (string.IsNullOrEmpty(evOwnerNic))
+            {
+                return Unauthorized("User not authenticated properly");
+            }
+
+            var command = new DeactivateEVOwnerCommand { NIC = evOwnerNic };
+            var result = await _mediator.Send(command);
+            return Success(result, "Account deactivated successfully");
+        }
+
+        // ? Activate EV owner account - can only be done by Backoffice
+        [HttpPatch("{nic}/activate")]
+        [Authorize(Roles = "Backoffice")]
+        public async Task<IActionResult> ActivateEVOwner(string nic)
+        {
+            var command = new ActivateEVOwnerCommand { NIC = nic };
+            var result = await _mediator.Send(command);
+            return Success(result, "Account activated successfully");
+        }
+
         // ? TEST ENDPOINT (Remove after testing)
         /// <summary>
         /// Test endpoint for getting all EV owners - any authenticated user
