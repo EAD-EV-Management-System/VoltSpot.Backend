@@ -245,23 +245,26 @@ namespace WebAPI.Controllers.V1
         public async Task<IActionResult> GetAvailableSlots(
             string id,
             [FromQuery] string date,
-            [FromQuery] string? time = null)
+            [FromQuery] string? time = null,
+            [FromQuery] int durationInMinutes = 120)
         {
             try
             {
-                // Validate ObjectId format
                 if (!ObjectId.TryParse(id, out _))
                 {
                     return Error("Invalid station ID format");
                 }
 
-                // Parse date
                 if (!DateTime.TryParse(date, out var parsedDate))
                 {
                     return Error("Invalid date format. Please use YYYY-MM-DD format");
                 }
 
-                // Parse time if provided
+                if (durationInMinutes <= 0 || durationInMinutes > 480)
+                {
+                    return Error("Duration must be between 1 and 480 minutes");
+                }
+
                 TimeSpan? parsedTime = null;
                 if (!string.IsNullOrEmpty(time))
                 {
@@ -276,7 +279,8 @@ namespace WebAPI.Controllers.V1
                 {
                     StationId = id,
                     Date = parsedDate,
-                    Time = parsedTime
+                    Time = parsedTime,
+                    DurationInMinutes = durationInMinutes
                 };
 
                 var result = await _mediator.Send(query);
@@ -293,10 +297,14 @@ namespace WebAPI.Controllers.V1
         }
 
         /// <summary>
-        /// Update slot availability (Station Operator or Backoffice)
+        /// Update slot configuration (Station Operator or Backoffice)
+        /// WARNING: This endpoint is deprecated for updating AvailableSlots.
+        /// Use GET /api/chargingstations/{id}/available-slots to check time-based availability.
+        /// This should only be used to update TotalSlots (physical capacity of the station).
         /// </summary>
         [HttpPatch("{id}/slots")]
         [Authorize(Roles = "Backoffice,StationOperator")]
+        [Obsolete("Updating AvailableSlots manually is deprecated. Use GET /api/chargingstations/{id}/available-slots for time-based availability.")]
         public async Task<IActionResult> UpdateSlotAvailability(string id, [FromBody] UpdateSlotAvailabilityRequestDto request)
         {
             try
@@ -320,7 +328,15 @@ namespace WebAPI.Controllers.V1
                 };
 
                 var result = await _mediator.Send(command);
-                return Success("Slot availability updated successfully");
+                
+                // Return success with deprecation warning
+                return Success(new
+                {
+                    message = "Slot configuration updated successfully",
+                    warning = "WARNING: Manually updating AvailableSlots is deprecated. " +
+                             "Slot availability is time-based and should be queried using " +
+                             "GET /api/chargingstations/{id}/available-slots with date and time parameters."
+                });
             }
             catch (ValidationException ex)
             {

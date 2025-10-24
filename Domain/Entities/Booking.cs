@@ -10,13 +10,39 @@ namespace Domain.Entities
         public int SlotNumber { get; set; }
         public DateTime BookingDate { get; set; }
         public DateTime ReservationDateTime { get; set; }
+        public int DurationInMinutes { get; set; } = 120; // Default 2 hours (120 minutes)
         public BookingStatus Status { get; set; }
         public string? CancellationReason { get; set; }
         public string QrCode { get; set; } = string.Empty;
 
+        /// <summary>
+        /// Calculates the end time of the booking based on reservation time and duration
+        /// </summary>
+        public DateTime GetEndDateTime()
+        {
+            return ReservationDateTime.AddMinutes(DurationInMinutes);
+        }
+
+        /// <summary>
+        /// Checks if this booking overlaps with a given time period
+        /// </summary>
+        public bool OverlapsWith(DateTime startTime, DateTime endTime)
+        {
+            var bookingEndTime = GetEndDateTime();
+            return ReservationDateTime < endTime && bookingEndTime > startTime;
+        }
+
         public void UpdateReservation(DateTime newReservationDateTime)
         {
             ReservationDateTime = newReservationDateTime;
+            UpdatedAt = DateTime.UtcNow;
+            Status = BookingStatus.Pending;
+        }
+
+        public void UpdateReservation(DateTime newReservationDateTime, int newDurationInMinutes)
+        {
+            ReservationDateTime = newReservationDateTime;
+            DurationInMinutes = newDurationInMinutes;
             UpdatedAt = DateTime.UtcNow;
             Status = BookingStatus.Pending;
         }

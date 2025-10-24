@@ -26,7 +26,8 @@ namespace WebAPI.Controllers.V1
                 EvOwnerNic = request.EvOwnerNic,
                 ChargingStationId = request.ChargingStationId,
                 SlotNumber = request.SlotNumber,
-                ReservationDateTime = request.ReservationDateTime
+                ReservationDateTime = request.ReservationDateTime,
+                DurationInMinutes = request.DurationInMinutes
             };
 
             var result = await _mediator.Send(command);
@@ -105,7 +106,8 @@ namespace WebAPI.Controllers.V1
             var command = new UpdateBookingCommand
             {
                 BookingId = request.BookingId,
-                NewReservationDateTime = request.NewReservationDateTime
+                NewReservationDateTime = request.NewReservationDateTime,
+                NewDurationInMinutes = request.NewDurationInMinutes
             };
 
             var result = await _mediator.Send(command);
