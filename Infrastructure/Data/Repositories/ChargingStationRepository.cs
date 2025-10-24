@@ -57,8 +57,15 @@ namespace Infrastructure.Data.Repositories
 
         public async Task<List<ChargingStation>> GetStationsByOperatorAsync(string operatorId)
         {
-            return await _collection.Find(s => s.AssignedOperatorIds.Contains(operatorId) && !s.IsDeleted)
-                                  .ToListAsync();
+            var filterBuilder = Builders<ChargingStation>.Filter;
+            var filter = filterBuilder.And(
+                filterBuilder.AnyEq(s => s.AssignedOperatorIds, operatorId),
+                filterBuilder.Or(
+                    filterBuilder.Eq(s => s.IsDeleted, false),
+                    filterBuilder.Exists(s => s.IsDeleted, false)
+                )
+            );
+            return await _collection.Find(filter).ToListAsync();
         }
 
         // New comprehensive search method

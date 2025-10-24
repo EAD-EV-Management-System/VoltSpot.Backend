@@ -211,6 +211,18 @@ namespace WebAPI.Controllers.V1
         }
 
         /// <summary>
+        /// Get charging stations assigned to a specific operator
+        /// </summary>
+        [HttpGet("operator/{operatorId}")]
+        [Authorize(Roles = "Backoffice,StationOperator")]
+        public async Task<IActionResult> GetChargingStationsByOperator(string operatorId)
+        {
+            var query = new GetChargingStationsByOperatorQuery { OperatorId = operatorId };
+            var result = await _mediator.Send(query);
+            return Success(result, $"Retrieved {result.Count} charging stations for operator");
+        }
+
+        /// <summary>
         /// Get charging station by ID
         /// </summary>
         [HttpGet("{id}")]

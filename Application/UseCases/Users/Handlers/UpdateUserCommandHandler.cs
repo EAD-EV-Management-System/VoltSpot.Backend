@@ -9,11 +9,16 @@ namespace Application.UseCases.Users.Handlers
     public class UpdateUserCommandHandler : IRequestHandler<UpdateUserCommand, UserResponseDto>
     {
         private readonly IUserRepository _userRepository;
+        private readonly IChargingStationRepository _stationRepository;
         private readonly IMapper _mapper;
 
-        public UpdateUserCommandHandler(IUserRepository userRepository, IMapper mapper)
+        public UpdateUserCommandHandler(
+            IUserRepository userRepository,
+            IChargingStationRepository stationRepository,
+            IMapper mapper)
         {
             _userRepository = userRepository;
+            _stationRepository = stationRepository;
             _mapper = mapper;
         }
         public async Task<UserResponseDto> Handle(UpdateUserCommand request, CancellationToken cancellationToken)
@@ -30,15 +35,45 @@ namespace Application.UseCases.Users.Handlers
                 throw new InvalidOperationException("Email already exists");
             }
 
+            // Track old station assignments for syncing
+            var oldStationIds = user.AssignedStationIds ?? new List<string>();
+            var newStationIds = request.AssignedStationIds ?? new List<string>();
+
             // Update user properties
             user.Email = request.Email;
             user.FirstName = request.FirstName;
             user.LastName = request.LastName;
             user.Role = request.Role;
             user.Status = request.Status;
-            user.AssignedStationIds = request.AssignedStationIds;
+            user.AssignedStationIds = newStationIds;
 
             var updatedUser = await _userRepository.UpdateAsync(user);
+
+            // Sync changes to charging stations
+            // Remove operator from stations that are no longer assigned
+            var stationsToRemoveFrom = oldStationIds.Except(newStationIds).ToList();
+            foreach (var stationId in stationsToRemoveFrom)
+            {
+                var station = await _stationRepository.GetByIdAsync(stationId);
+                if (station != null)
+                {
+                    station.UnassignOperator(user.Id);
+                    await _stationRepository.UpdateAsync(station);
+                }
+            }
+
+            // Add operator to newly assigned stations
+            var stationsToAddTo = newStationIds.Except(oldStationIds).ToList();
+            foreach (var stationId in stationsToAddTo)
+            {
+                var station = await _stationRepository.GetByIdAsync(stationId);
+                if (station != null)
+                {
+                    station.AssignOperator(user.Id);
+                    await _stationRepository.UpdateAsync(station);
+                }
+            }
+
             return _mapper.Map<UserResponseDto>(updatedUser);
         }
     }
