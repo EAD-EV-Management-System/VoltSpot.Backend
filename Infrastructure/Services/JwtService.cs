@@ -23,6 +23,9 @@ namespace Infrastructure.Services
 
         public string GenerateAccessToken(User user)
         {
+            // Explicitly convert role enum to string to ensure proper authorization
+            var roleString = user.Role.ToString(); // This will be "Backoffice" or "StationOperator"
+            
             var claims = new List<Claim>
             {
                 new(ClaimTypes.NameIdentifier, user.Id),
@@ -30,9 +33,10 @@ namespace Infrastructure.Services
                 new(ClaimTypes.Email, user.Email),
                 new(ClaimTypes.GivenName, user.FirstName),
                 new(ClaimTypes.Surname, user.LastName),
-                new(ClaimTypes.Role, user.Role.ToString()),
+                new(ClaimTypes.Role, roleString), // Use explicit string instead of ToString()
                 new("status", user.Status.ToString()),
-                new("userId", user.Id)
+                new("userId", user.Id),
+                new("role", roleString) // Add additional role claim for redundancy
             };
 
             // Add assigned station IDs for Station Operators
@@ -70,7 +74,8 @@ namespace Infrastructure.Services
                 new(ClaimTypes.Role, "EVOwner"),
                 new("status", evOwner.Status.ToString()),
                 new("evOwnerId", evOwner.Id),
-                new("nic", evOwner.NIC)
+                new("nic", evOwner.NIC),
+                new("role", "EVOwner") // Add additional role claim for redundancy
             };
 
             var tokenDescriptor = new SecurityTokenDescriptor
