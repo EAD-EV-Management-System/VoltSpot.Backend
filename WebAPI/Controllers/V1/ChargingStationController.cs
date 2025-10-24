@@ -381,6 +381,41 @@ namespace WebAPI.Controllers.V1
             }
         }
 
+        /// <summary>
+        /// Activate charging station (Backoffice only)
+        /// </summary>
+        [HttpPatch("{id}/activate")]
+        [Authorize(Roles = "Backoffice")]
+        public async Task<IActionResult> ActivateChargingStation(string id, [FromBody] ActivateChargingStationRequestDto? request = null)
+        {
+            try
+            {
+                // Validate ObjectId format
+                if (!ObjectId.TryParse(id, out _))
+                {
+                    return Error("Invalid station ID format");
+                }
+
+                var command = new ActivateChargingStationCommand 
+                { 
+                    StationId = id,
+                    ActivatedBy = request?.ActivatedBy,
+                    Notes = request?.Notes
+                };
+                
+                var result = await _mediator.Send(command);
+                return Success("Charging station activated successfully");
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return Error($"An error occurred: {ex.Message}", 500);
+            }
+        }
+
         private ChargingType ResolveChargingType(ChargingType? chargingType, ChargingType type)
         {
             // If chargingType is provided and valid, use it
