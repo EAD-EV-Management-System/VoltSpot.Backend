@@ -74,5 +74,40 @@ namespace WebAPI.Controllers.V1
 
             return Success(userInfo, "User information retrieved successfully");
         }
+
+        // ? DIAGNOSTIC ENDPOINT - Verify token claims
+        /// <summary>
+        /// Test endpoint to verify all claims in the JWT token
+        /// </summary>
+        [HttpGet("verify-token")]
+        [Authorize]
+        public IActionResult VerifyToken()
+        {
+            var claims = User.Claims.Select(c => new
+            {
+                Type = c.Type,
+                Value = c.Value
+            }).ToList();
+
+            var roleClaimValue = User.FindFirst(ClaimTypes.Role)?.Value;
+            var isInBackofficeRole = User.IsInRole("Backoffice");
+            var isInEVOwnerRole = User.IsInRole("EVOwner");
+            var isInStationOperatorRole = User.IsInRole("StationOperator");
+
+            return Success(new
+            {
+                AllClaims = claims,
+                RoleClaimValue = roleClaimValue,
+                IsInBackofficeRole = isInBackofficeRole,
+                IsInEVOwnerRole = isInEVOwnerRole,
+                IsInStationOperatorRole = isInStationOperatorRole,
+                ClaimTypes = new
+                {
+                    RoleClaimType = ClaimTypes.Role,
+                    NameClaimType = ClaimTypes.Name,
+                    NameIdentifierClaimType = ClaimTypes.NameIdentifier
+                }
+            }, "Token claims verified successfully");
+        }
     }
 }
